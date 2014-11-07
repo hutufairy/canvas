@@ -91,7 +91,7 @@
                 drawGuideLines(loc.x, loc.y);
                 updateReadout(loc.x, loc.y);
             }
-            spriteSheet.src = "./imgs/1-2-sprite.png";
+            spriteSheet.src = "../imgs/1-2-sprite.png";
 
             spriteSheet.onload = function(e){
                 drawSpritSheet();
