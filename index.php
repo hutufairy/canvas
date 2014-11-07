@@ -5,9 +5,9 @@
     </head>
     <body>
         <div ng-view></div>
-        <script src="./lib/angular/v1.3.1/angular.min.js"></script>
-        <script src="./lib/angular/v1.3.1/angular-route.min.js"></script>
-        <script src="./lib/angular/v1.3.1/angular-resource.min.js"></script>
+        <script src="./bower_components/angular/angular.min.js"></script>
+        <script src="./bower_components/angular-route/angular-route.min.js"></script>
+        <script src="./bower_components/angular-resource/angular-resource.min.js"></script>
         <script src="./js/example.js"></script>
     </body>
 </html>
