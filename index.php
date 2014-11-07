@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="exampleApp">
     <head>
         <title>canvas学习用例</title>
     </head>
     <body>
-        <p><a href="./example/box-flex.php">box-flex</a></p>
-        <p><a href="./example/1-1-clock.php">1-1-clock</a></p>
-        <p><a href="./example/1-2-sprite.php">1-2-sprite</a></p>
+        <div ng-view></div>
+        <script src="./lib/angular/v1.3.1/angular.min.js"></script>
+        <script src="./lib/angular/v1.3.1/angular-route.min.js"></script>
+        <script src="./lib/angular/v1.3.1/angular-resource.min.js"></script>
+        <script src="./js/example.js"></script>
     </body>
 </html>
