@@ -22,9 +22,11 @@
             context.lineJoin = 'round';
             context.lineWidth = 30;
             context.font = "Arial 24px";
-            context.fillText('Click anywhere to ease', 175, 40);
+            context.fillText('Click anywhere to ease', 225, 200);
 
+            context.strokeStyle = "goldenrod";
             context.strokeRect(75, 100, 200, 200);//矩形描边
+            context.fillStyle = "rgba(0,0,255,0.5)";
             context.fillRect(325, 100, 200, 200);//矩形填充
 
             context.canvas.onmousedown = function(){
