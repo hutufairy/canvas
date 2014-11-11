@@ -4,18 +4,21 @@
         <title>1-1-clock</title>
         <style>
             body{background: #ddd;}
-            #canvas{
+            #snapshotImage{
                 background: #fff;
                 margin: 20px;
                 padding: 20px;
                 border: inset thin #aaa;
             }
+            #canvas{display: none;}
         </style>
     </head>
     <body>
+        <img src="" alt="clock" id="snapshotImage" />
         <canvas id="canvas" width="400" height="400"></canvas>
         <script>
-            var canvas = document.getElementById('canvas');
+            var canvas = document.getElementById('canvas'),
+                snapshotImage = document.getElementById('snapshotImage');
             var context = canvas.getContext('2d');
 
             var cW = canvas.width, cH = canvas.height,
@@ -76,13 +79,22 @@
 
             function drawClock(){
                 context.clearRect(0, 0, cW, cH);
+                context.save();
 
+                context.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                context.fillRect(0, 0, cW, cH);
                 drawCircle();
-                drawCenter();
-                drawNumerals();
                 drawHands();
 
+                context.restore();
+                drawCenter(); //恢复原来的fillstyle 再作画
+                drawNumerals();//恢复原来的fillstyle 再作画
+                updateClockImage();
                 time_id = setTimeout(drawClock, 1000);
+            }
+
+            function updateClockImage(){
+                snapshotImage.src = canvas.toDataURL();
             }
 
             drawClock();
