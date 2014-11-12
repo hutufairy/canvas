@@ -1,22 +1,29 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>2-1-rect</title>
+        <title>2-3-pattern</title>
         <style>
             body{background: #ddd;}
             #canvas{
-                background: #fff;
-                margin: 20px;
-                padding: 20px;
-                border: inset thin #aaa;
+                background: #eee;
+                border: inset thin cornflowblue;
+            }
+            #radio{
+                padding: 10px;
             }
         </style>
     </head>
     <body>
-        <canvas id="canvas" width="600" height="400">Canvas not support</canvas>
+        <div id="radio">
+            <label><input id="repeatRadio" type="radio" name="patternRadio" checked>repeat</label>
+            <label><input id="repeatXRadio" type="radio" name="patternRadio">repeat-x</label>
+            <label><input id="repeatYRadio" type="radio" name="patternRadio">repeat-y</label>
+            <label><input id="noRepeatRadio" type="radio" name="patternRadio">no-repeat</label>
+        </div>
+        <canvas id="canvas" width="450" height="275">Canvas not support</canvas>
         <script>
-            var canvas = document.getElementById('canvas');
-            var context = canvas.getContext('2d');
+            var canvas = document.getElementById('canvas'),
+                context = canvas.getContext('2d');
             var cW = canvas.width, cH = canvas.height;
 
             context.lineJoin = 'round';

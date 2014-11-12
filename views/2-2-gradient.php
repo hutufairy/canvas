@@ -13,7 +13,7 @@
         </style>
     </head>
     <body>
-        <canvas id="canvas" width="600" height="800"></canvas>
+        <canvas id="canvas" width="600" height="800">Canvas not support</canvas>
         <script>
             var canvas = document.getElementById('canvas'),
                 context = canvas.getContext('2d'),
@@ -41,7 +41,6 @@
 
             context.fillStyle = setLinearGradient(context, 325, 225, 550, 350);
             context.fillRect(325, 225, 225, 125);
-
             var gradient = context.createRadialGradient(cW/2, cH, 10, cW/2, 400, 100);
             gradient.addColorStop(0, 'blue');
             gradient.addColorStop(0.25, 'white');

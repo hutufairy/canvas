@@ -15,7 +15,7 @@
     </head>
     <body>
         <img src="" alt="clock" id="snapshotImage" />
-        <canvas id="canvas" width="400" height="400"></canvas>
+        <canvas id="canvas" width="400" height="400">Canvas not support</canvas>
         <script>
             var canvas = document.getElementById('canvas'),
                 snapshotImage = document.getElementById('snapshotImage');

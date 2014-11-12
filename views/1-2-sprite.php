@@ -22,7 +22,7 @@
     </head>
     <body>
         <div id="readout"></div>
-        <canvas id="canvas" width="400" height="400"></canvas>
+        <canvas id="canvas" width="400" height="400">Canvas not support</canvas>
         <script>
             var canvas = document.getElementById('canvas'),
                 readout = document.getElementById('readout'),
