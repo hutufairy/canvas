@@ -33,10 +33,10 @@
 
             var bbox = canvas.getBoundingClientRect();
 
-            function windowToCanvas(canvas, x, y){
+            function windowToCanvas(x, y){
                 return {
-                    x: (cW / bbox.width) * (x - bbox.left),
-                    y: (cH / bbox.height) * (y - bbox.top)
+                    x: x - bbox.left * (cW/bbox.width),
+                    y: y - bbox.top * (cW/bbox.height)
                 }
             }
             
