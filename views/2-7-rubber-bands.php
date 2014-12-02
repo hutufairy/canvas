@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>2-6-axis</title>
+        <title>2-7-rubber-bands</title>
         <style>
             body{background: #ddd;}
             #canvas{
@@ -97,6 +97,14 @@
                 context.lineTo(loc.x, loc.y);
                 context.rect(rubberbandRect.left, rubberbandRect.top, rubberbandRect.width, rubberbandRect.height);
                 context.stroke();
+                // var radius = Math.sqrt(Math.pow(rubberbandRect.width, 2) + Math.pow(rubberbandRect.height, 2));
+                // context.beginPath();
+                // context.moveTo(mousedown.x, mousedown.y);
+                // context.lineTo(loc.x, loc.y);
+                // context.stroke();
+                // context.beginPath();
+                // context.arc(mousedown.x, mousedown.y, radius, 0, Math.PI*2, false);
+                // context.stroke();
             }
 
             function updateRubberband(loc){
