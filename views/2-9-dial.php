@@ -199,8 +199,8 @@
                 for( var angle = 0; angle < angle_max; angle += PI/8){
                     context.beginPath();
                     context.fillText((angle*180/PI).toFixed(0), 
-                        circle.x + Math.cos(angle) * (radius - tick_width/2),
-                        circle.y - Math.sin(angle) * (radius - tick_width/2))
+                        circle.x + Math.cos(angle) * (radius + tick_width),
+                        circle.y - Math.sin(angle) * (radius + tick_width))
                 }
                 context.restore();
             }
