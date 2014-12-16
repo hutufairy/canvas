@@ -10,11 +10,6 @@
                 margin: 10px 0 0 10px;
                 box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
             }
-            #controls{
-                position: absolute;
-                left: 25px;
-                top: 25px;
-            }
         </style>
     </head>
     <body>

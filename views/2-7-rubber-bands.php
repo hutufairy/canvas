@@ -20,6 +20,14 @@
     <body>
         <canvas id="canvas" width="600" height="400">Canvas not support</canvas>
         <div id="controls">
+            choose sides:
+            <select id="sidesSelect">
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="8">8</option>
+            </select>
             stroke color: 
             <select id="strokeStyleSelect">
                 <option value="red">red</option>
@@ -41,13 +49,20 @@
                 eraseAllButton = document.getElementById('eraseAllButton'),
                 strokeStyleSelect = document.getElementById('strokeStyleSelect'),
                 guidewireCheckbox = document.getElementById('guidewireCheckbox'),
+                sidesSelect = document.getElementById('sidesSelect'),
                 drawingSurfaceImageData,
                 mousedown = {},
                 rubberbandRect = {},
                 dragging = false,
-                guidewires = guidewireCheckbox.checked;
+                guidewires = guidewireCheckbox.checked,
+                sides = sidesSelect.value;
 
-            var cW = canvas.width, cH = canvas.height;
+            var cW = canvas.width, cH = canvas.height,
+                angle_max = Math.PI * 2;
+            var Point = function(x, y){
+                this.x = x;
+                this.y = y;
+            }
 
             // draw grid
             function drawGrid(context, color, stepx, stepy){
@@ -76,6 +91,30 @@
                 }
             }
 
+            function getPolygonPoints(oX, oY, radius, sides, startAngle){
+                var points = [],
+                    angle = startAngle || 0;
+
+                for(var i = 0; i < sides; i++){
+                    points.push(new Point(oX + radius * Math.cos(angle),
+                                          oY + radius * Math.sin(angle)));
+                    angle += angle_max/sides;
+                }
+                return points;
+            }
+
+            function createPolygonPath(oX, oY, radius, sides, startAngle){
+                var points = getPolygonPoints(oX, oY, radius, sides, startAngle);
+
+                context.beginPath();
+                context.moveTo(points[0].x, points[0].y);
+
+                for(var i = 1; i < sides; i++){
+                    context.lineTo(points[i].x, points[i].y);
+                }
+                context.closePath();
+            }
+
             function saveDawingSurface(){
                 drawingSurfaceImageData = context.getImageData(0, 0, cW, cH);
             }
@@ -95,16 +134,15 @@
                 context.beginPath();
                 context.moveTo(mousedown.x, mousedown.y);
                 context.lineTo(loc.x, loc.y);
-                context.rect(rubberbandRect.left, rubberbandRect.top, rubberbandRect.width, rubberbandRect.height);
+                // context.rect(rubberbandRect.left, rubberbandRect.top, rubberbandRect.width, rubberbandRect.height);
                 context.stroke();
-                // var radius = Math.sqrt(Math.pow(rubberbandRect.width, 2) + Math.pow(rubberbandRect.height, 2));
-                // context.beginPath();
-                // context.moveTo(mousedown.x, mousedown.y);
-                // context.lineTo(loc.x, loc.y);
-                // context.stroke();
-                // context.beginPath();
-                // context.arc(mousedown.x, mousedown.y, radius, 0, Math.PI*2, false);
-                // context.stroke();
+                var radius = Math.sqrt(Math.pow(rubberbandRect.width, 2) + Math.pow(rubberbandRect.height, 2));
+                var angle = Math.acos((loc.x - mousedown.x)/radius);
+                if(mousedown.y > loc.y){
+                    angle = angle_max - angle;
+                }
+                createPolygonPath(mousedown.x, mousedown.y, radius, sides, angle);
+                context.stroke();
             }
 
             function updateRubberband(loc){
@@ -177,6 +215,9 @@
 
             guidewireCheckbox.onchange = function(e){
                 guidewires = guidewireCheckbox.checked;
+            }
+            sidesSelect.onchange = function(e){
+                sides = sidesSelect.value;
             }
             context.strokeStyle = strokeStyleSelect.value;
             drawGrid(context, '#efefef', 10, 10);
