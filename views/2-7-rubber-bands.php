@@ -41,6 +41,9 @@
             </select>
             Guidewires:
             <input id="guidewireCheckbox" type="checkbox" checked />
+
+            edit:
+            <input id="editCheckbox" type="checkbox" />
             <input id="eraseAllButton" type="button" value="Erase all" />
         </div>
         <script>
@@ -49,19 +52,79 @@
                 eraseAllButton = document.getElementById('eraseAllButton'),
                 strokeStyleSelect = document.getElementById('strokeStyleSelect'),
                 guidewireCheckbox = document.getElementById('guidewireCheckbox'),
+                editCheckbox = document.getElementById('editCheckbox'),
+
+                guidewires = guidewireCheckbox.checked,
                 sidesSelect = document.getElementById('sidesSelect'),
+                strokeStyle,
+
+                sides = sidesSelect.value,
+
                 drawingSurfaceImageData,
                 mousedown = {},
                 rubberbandRect = {},
+
                 dragging = false,
-                guidewires = guidewireCheckbox.checked,
-                sides = sidesSelect.value;
+                draggingOffsetX,
+                draggingOffsetY,
+
+                editing = false,
+                polygons = [];// 多边形对象集合
 
             var cW = canvas.width, cH = canvas.height,
                 angle_max = Math.PI * 2;
             var Point = function(x, y){
                 this.x = x;
                 this.y = y;
+            }
+
+            var Polygon = function(ox, oy, radius, sides, startAngle, strokeStyle){
+                this.x = ox;
+                this.y = oy;
+                this.radius = radius;
+                this.sides = sides;
+                this.startAngle = startAngle;
+                this.strokeStyle = strokeStyle;
+            }
+
+            Polygon.prototype = {
+                getPoints: function(){
+                    var points = [],
+                        angle = this.startAngle || 0;
+                    for(var i = 0; i < this.sides; i++){
+                        points.push(new Point(this.x + this.radius * Math.cos(angle),
+                                              this.y + this.radius * Math.sin(angle)));
+                        angle += angle_max/this.sides;
+                    }
+                    return points;
+                },
+                createPath: function(context){
+                    var points = this.getPoints();
+                    context.beginPath();
+                    context.moveTo(points[0].x, points[0].y);
+
+                    for(var i = 1; i < this.sides; i++){
+                        context.lineTo(points[i].x, points[i].y);
+                    }
+                    context.closePath();
+                },
+                stroke: function (context) {
+                    context.save();
+                    this.createPath(context);
+                    context.strokeStyle = this.strokeStyle;
+                    context.stroke();
+                    context.restore();
+                },
+                move: function(x, y){
+                    this.x = x;
+                    this.y = y;
+                }
+            }
+
+            function drawPalygons(context){
+                polygons.forEach(function(polygon){
+                    polygon.stroke(context);
+                })
             }
 
             // draw grid
@@ -91,30 +154,6 @@
                 }
             }
 
-            function getPolygonPoints(oX, oY, radius, sides, startAngle){
-                var points = [],
-                    angle = startAngle || 0;
-
-                for(var i = 0; i < sides; i++){
-                    points.push(new Point(oX + radius * Math.cos(angle),
-                                          oY + radius * Math.sin(angle)));
-                    angle += angle_max/sides;
-                }
-                return points;
-            }
-
-            function createPolygonPath(oX, oY, radius, sides, startAngle){
-                var points = getPolygonPoints(oX, oY, radius, sides, startAngle);
-
-                context.beginPath();
-                context.moveTo(points[0].x, points[0].y);
-
-                for(var i = 1; i < sides; i++){
-                    context.lineTo(points[i].x, points[i].y);
-                }
-                context.closePath();
-            }
-
             function saveDawingSurface(){
                 drawingSurfaceImageData = context.getImageData(0, 0, cW, cH);
             }
@@ -136,13 +175,18 @@
                 context.lineTo(loc.x, loc.y);
                 // context.rect(rubberbandRect.left, rubberbandRect.top, rubberbandRect.width, rubberbandRect.height);
                 context.stroke();
+                context.closePath();
+
                 var radius = Math.sqrt(Math.pow(rubberbandRect.width, 2) + Math.pow(rubberbandRect.height, 2));
                 var angle = Math.acos((loc.x - mousedown.x)/radius);
                 if(mousedown.y > loc.y){
                     angle = angle_max - angle;
                 }
-                createPolygonPath(mousedown.x, mousedown.y, radius, sides, angle);
-                context.stroke();
+                var polygon = new Polygon(mousedown.x, mousedown.y, radius, sides, angle, strokeStyle);
+                polygon.stroke(context);
+                if(!dragging){
+                    polygons.push(polygon);
+                }
             }
 
             function updateRubberband(loc){
@@ -173,44 +217,82 @@
                 context.restore();
             }
 
-            canvas.onmousedown = function(e){
-                var loc = windowToCanvas(e.clientX, e.clientY);
+            function startDragging(loc){
                 saveDawingSurface();
                 mousedown.x = loc.x;
                 mousedown.y = loc.y;
-                dragging = true;
+            }
+            function startEditing(){
+                canvas.style.cursor = 'pointer';
+                editing = true;
+            }
+
+            function stopEditing(){
+                canvas.style.cursor = 'crosshair';
+                editing = false;
+            }
+
+            function init(){
+                context.clearRect(0, 0, cW, cH);
+                drawGrid(context, '#efefef', 10, 10);
+            }
+
+            canvas.onmousedown = function(e){
+                var loc = windowToCanvas(e.clientX, e.clientY);
+                if(editing){
+                    polygons.forEach( function (polygon) {
+                        polygon.createPath(context);
+                        if (context.isPointInPath(loc.x, loc.y)) {
+                            startDragging(loc);
+                            dragging = polygon;
+                            draggingOffsetX = loc.x - polygon.x;
+                            draggingOffsetY = loc.y - polygon.y;
+                            return false;
+                        }
+                    });
+                }else{
+                    startDragging(loc);
+                    dragging = true; 
+                }
                 return false;
             }
 
             canvas.onmousemove = function(e){
-                if(dragging){
-                    e.preventDefault();
-                    var loc = windowToCanvas(e.clientX, e.clientY);
-                    restoreDrawingSurface();
-                    updateRubberband(loc);
-                    if(guidewires){
-                        drawGuidewires(loc.x, loc.y);
+                var loc = windowToCanvas(e.clientX, e.clientY);
+                e.preventDefault()
+                if(dragging && editing){
+                    dragging.x = loc.x - draggingOffsetX;
+                    dragging.y = loc.y - draggingOffsetY;
+                    init();
+                    drawPalygons(context);
+                }else{
+                    if(dragging){
+                        restoreDrawingSurface();
+                        updateRubberband(loc);
+                        if(guidewires){
+                            drawGuidewires(loc.x, loc.y);
+                        }    
                     }
                 }
             }
 
             canvas.onmouseup = function(e){
-                if(dragging){
-                    var loc = windowToCanvas(e.clientX, e.clientY);
+                var loc = windowToCanvas(e.clientX, e.clientY);
+                dragging = false;
+                if(!editing){
                     restoreDrawingSurface();
                     updateRubberband(loc);
-                    dragging = false;
                 }
             }
 
             eraseAllButton.onclick = function(e){
-                context.clearRect(0, 0, cW, cH);
-                drawGrid(context, '#efefef', 10, 10);
+                init();
+                polygons = [];
                 saveDawingSurface();
             }
 
             strokeStyleSelect.onchange = function(e){
-                context.strokeStyle = strokeStyleSelect.value;
+                strokeStyle = strokeStyleSelect.value;
             }
 
             guidewireCheckbox.onchange = function(e){
@@ -219,8 +301,16 @@
             sidesSelect.onchange = function(e){
                 sides = sidesSelect.value;
             }
+            editCheckbox.onchange = function(e) {
+                if(editCheckbox.checked){
+                    startEditing();
+                }else{
+                    stopEditing();
+                }
+            }
+
             context.strokeStyle = strokeStyleSelect.value;
-            drawGrid(context, '#efefef', 10, 10);
+            init();
         </script>
     </body>
 </html>
